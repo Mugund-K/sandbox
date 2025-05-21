@@ -25,11 +25,23 @@ def _read_csv_safely(path: Path, **kwargs) -> pd.DataFrame:
 
 
 def load_skill_data(skill_file: Path) -> pd.DataFrame:
-    """Load skill CSV and return DataFrame with Expression Name."""
+    """Load a skill CSV and return a DataFrame with a ``name`` column."""
     df = _read_csv_safely(skill_file)
-    if 'Expression Name' not in df.columns:
-        raise ValueError(f"Expected column 'Expression Name' in {skill_file}")
-    return df[['Expression Name']].dropna().rename(columns={'Expression Name': 'name'})
+
+    # ``skills_2023.csv`` originally contained a column called ``Expression Name``.
+    # Newer datasets may provide ``processed_name`` instead.  Support either
+    # layout so callers can simply point ``--skills_2023``/``--skills_2025`` to
+    # the appropriate file without additional preprocessing.
+    if "Expression Name" in df.columns:
+        column = "Expression Name"
+    elif "processed_name" in df.columns:
+        column = "processed_name"
+    else:
+        raise ValueError(
+            f"Expected column 'Expression Name' or 'processed_name' in {skill_file}"
+        )
+
+    return df[[column]].dropna().rename(columns={column: "name"})
 
 
 def load_count_data(count_file: Path) -> pd.DataFrame:
