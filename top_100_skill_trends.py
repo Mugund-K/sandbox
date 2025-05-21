@@ -34,7 +34,7 @@ def load_count_data(path: Path) -> pd.DataFrame:
 def get_common_top_skills(
     counts_2023: pd.DataFrame, counts_2025: pd.DataFrame, top_n: int = DEFAULT_TOP_N
 ) -> pd.DataFrame:
-    """Return the top ``top_n`` skills appearing in both years."""
+    """Return the top ``top_n`` skills appearing in both years with trend data."""
     merged = pd.merge(
         counts_2023,
         counts_2025,
@@ -43,7 +43,12 @@ def get_common_top_skills(
         suffixes=("_2023", "_2025"),
     )
     merged["total"] = merged["count_2023"] + merged["count_2025"]
-    return merged.sort_values("total", ascending=False).head(top_n)
+    top = merged.sort_values("total", ascending=False).head(top_n)
+    # Calculate percentage change from 2023 to 2025.  ``pd.NA`` avoids
+    # divide-by-zero warnings when a skill has zero mentions in 2023.
+    base = top["count_2023"].replace(0, pd.NA)
+    top["pct_change"] = ((top["count_2025"] - top["count_2023"]) / base) * 100
+    return top.drop(columns="total")
 
 
 def plot_skill_trends(df: pd.DataFrame, output: Path) -> None:
