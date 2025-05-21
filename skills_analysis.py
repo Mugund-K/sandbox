@@ -4,9 +4,28 @@ import seaborn as sns
 from pathlib import Path
 
 
+def _read_csv_safely(path: Path, **kwargs) -> pd.DataFrame:
+    """Read a CSV file and gracefully handle parsing errors."""
+    try:
+        return pd.read_csv(path, **kwargs)
+    except pd.errors.ParserError as e:
+        # The file has inconsistent rows. Inform the user and retry while
+        # skipping the malformed lines. ``on_bad_lines`` was introduced in
+        # pandas 1.3. For older versions ``error_bad_lines`` is used.
+        print(
+            f"Warning while reading {path}: {e}. "
+            "Attempting to skip malformed lines."
+        )
+        try:
+            return pd.read_csv(path, on_bad_lines="skip", **kwargs)
+        except TypeError:
+            # Fallback for older pandas versions
+            return pd.read_csv(path, error_bad_lines=False, warn_bad_lines=True, **kwargs)
+
+
 def load_skill_data(skill_file: Path) -> pd.DataFrame:
     """Load skill CSV and return DataFrame with Expression Name."""
-    df = pd.read_csv(skill_file)
+    df = _read_csv_safely(skill_file)
     if 'Expression Name' not in df.columns:
         raise ValueError(f"Expected column 'Expression Name' in {skill_file}")
     return df[['Expression Name']].dropna().rename(columns={'Expression Name': 'name'})
@@ -14,7 +33,7 @@ def load_skill_data(skill_file: Path) -> pd.DataFrame:
 
 def load_count_data(count_file: Path) -> pd.DataFrame:
     """Load parent count CSV and return DataFrame with name and count."""
-    df = pd.read_csv(count_file)
+    df = _read_csv_safely(count_file)
     if not {'name', 'count'}.issubset(df.columns):
         raise ValueError(f"Expected columns 'name' and 'count' in {count_file}")
     return df[['name', 'count']]
