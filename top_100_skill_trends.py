@@ -9,11 +9,24 @@ DEFAULT_TOP_N = 100
 
 
 def load_count_data(path: Path) -> pd.DataFrame:
-    """Load a CSV containing columns ``name`` and ``count``."""
+    """Load a CSV containing columns ``name`` and ``count``.
+
+    If ``path`` lacks the required columns, look for a file named
+    ``parent_<original>`` in the same directory.  This mirrors the layout of the
+    example dataset where aggregated counts live in ``parent_2023.csv`` and
+    ``parent_2025.csv`` while ``2023.csv``/``2025.csv`` only contain raw skill
+    rows.
+    """
     df = pd.read_csv(path)
-    if not {'name', 'count'}.issubset(df.columns):
-        raise ValueError(f"Expected columns 'name' and 'count' in {path}")
-    return df[['name', 'count']]
+    if not {"name", "count"}.issubset(df.columns):
+        alt_path = path.with_name(f"parent_{path.name}")
+        if alt_path.exists():
+            df = pd.read_csv(alt_path)
+    if not {"name", "count"}.issubset(df.columns):
+        raise ValueError(
+            f"Expected columns 'name' and 'count' in {path} or {alt_path}"
+        )
+    return df[["name", "count"]]
 
 
 def get_common_top_skills(
