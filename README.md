@@ -30,7 +30,9 @@ Generates a trend report for the skills that appear in both 2023 and 2025. The
 script takes the counts for each year, selects the top N shared skills (default
 100) based on combined mentions, and produces a grid of line charts showing the
 change for each skill between the two years. A CSV with the selected skills is
-also written.
+also written. If the provided CSV lacks a `count` column the script looks for a
+file named `parent_<year>.csv` in the same directory, mirroring the structure of
+the public dataset.
 
 Example:
 
