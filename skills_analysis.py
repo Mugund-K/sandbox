@@ -10,18 +10,25 @@ def _read_csv_safely(path: Path, **kwargs) -> pd.DataFrame:
     try:
         return pd.read_csv(path, **kwargs)
     except pd.errors.ParserError as e:
-        # The file has inconsistent rows. Inform the user and retry while
-        # skipping the malformed lines. ``on_bad_lines`` was introduced in
-        # pandas 1.3. For older versions ``error_bad_lines`` is used.
+        # Inform the user and retry using a more permissive configuration that
+        # skips malformed lines.  ``on_bad_lines`` was introduced in pandas 1.3
+        # while ``error_bad_lines`` is used in older versions.  Using the Python
+        # engine avoids C-engine tokenization failures.
         print(
             f"Warning while reading {path}: {e}. "
-            "Attempting to skip malformed lines."
+            "Attempting to skip malformed lines with the Python engine."
         )
         try:
-            return pd.read_csv(path, on_bad_lines="skip", **kwargs)
+            return pd.read_csv(path, on_bad_lines="skip", engine="python", **kwargs)
         except TypeError:
             # Fallback for older pandas versions
-            return pd.read_csv(path, error_bad_lines=False, warn_bad_lines=True, **kwargs)
+            return pd.read_csv(
+                path,
+                error_bad_lines=False,
+                warn_bad_lines=True,
+                engine="python",
+                **kwargs,
+            )
 
 
 def load_skill_data(skill_file: Path) -> pd.DataFrame:
