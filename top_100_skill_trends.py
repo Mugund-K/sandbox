@@ -100,7 +100,15 @@ def main() -> None:
     counts_2025 = load_count_data(Path(args.counts_2025))
 
     top_common = get_common_top_skills(counts_2023, counts_2025, args.top_n)
-    top_common.to_csv(output_dir / "top_common_skills.csv", index=False)
+
+    # Round percentage change and add a trailing percent sign for the CSV
+    csv_df = top_common.copy()
+    csv_df["pct_change"] = (
+        csv_df["pct_change"].round().astype("Int64").map(
+            lambda x: f"{x}%" if pd.notna(x) else ""
+        )
+    )
+    csv_df.to_csv(output_dir / "top_common_skills.csv", index=False)
 
     plot_skill_trends(top_common, output_dir / "skill_trends.png")
     print(f"Report written to {output_dir}")
