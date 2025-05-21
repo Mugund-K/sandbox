@@ -4,6 +4,8 @@ from pathlib import Path
 import pandas as pd
 import matplotlib.pyplot as plt
 
+from skills_analysis import _read_csv_safely
+
 
 DEFAULT_TOP_N = 100
 
@@ -17,11 +19,11 @@ def load_count_data(path: Path) -> pd.DataFrame:
     ``parent_2025.csv`` while ``2023.csv``/``2025.csv`` only contain raw skill
     rows.
     """
-    df = pd.read_csv(path)
+    df = _read_csv_safely(path)
     if not {"name", "count"}.issubset(df.columns):
         alt_path = path.with_name(f"parent_{path.name}")
         if alt_path.exists():
-            df = pd.read_csv(alt_path)
+            df = _read_csv_safely(alt_path)
     if not {"name", "count"}.issubset(df.columns):
         raise ValueError(
             f"Expected columns 'name' and 'count' in {path} or {alt_path}"
