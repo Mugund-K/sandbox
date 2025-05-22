@@ -34,10 +34,20 @@ def get_volatile_skills(
 ) -> pd.DataFrame:
     """Return the ``top_n`` most volatile skills shared between both years."""
     deltas = compute_deltas(counts_2023, counts_2025)
-    shared = deltas.dropna(subset=["pct_change"])
-    return shared.sort_values("volatility", ascending=False).head(top_n)[
-        ["name", "volatility", "pct_change"]
-    ]
+    shared = deltas.dropna(subset=["pct_change"]).copy()
+    top = shared.sort_values("volatility", ascending=False).head(top_n)
+
+    # Format counts as integers and percentage values with trailing percent signs
+    top["count_2023"] = top["count_2023"].round().astype("Int64")
+    top["count_2025"] = top["count_2025"].round().astype("Int64")
+    top["pct_change"] = top["pct_change"].round().map(
+        lambda x: f"{int(x)}%" if pd.notna(x) else ""
+    )
+    top["volatility"] = top["volatility"].round().map(
+        lambda x: f"{int(x)}%" if pd.notna(x) else ""
+    )
+
+    return top[["name", "volatility", "pct_change", "count_2023", "count_2025"]]
 
 
 def main() -> None:
