@@ -67,3 +67,18 @@ python top_100_volatile_skills.py \
 ```
 
 The resulting CSV `top_volatile_skills.csv` contains the skill name along with its volatility percentage and raw percent change.
+
+## `top_100_growth_buckets.py`
+
+Buckets skills into groups based on their percentage growth from 2023 to 2025 and writes the top skills from each group.
+
+```bash
+python top_100_growth_buckets.py \
+  --counts_2023 2023.csv \
+  --counts_2025 2025.csv \
+  --output_dir trends
+```
+
+Four CSVs are produced in the output directory:
+`top_high_growth_skills.csv`, `top_moderate_growth_skills.csv`,
+`top_flat_skills.csv`, and `top_decline_skills.csv`.
