@@ -54,3 +54,16 @@ python top_100_gone_skills.py \
   --counts_2025 2025.csv \
   --output_dir trends
 ```
+
+## `top_100_volatile_skills.py`
+
+Identifies the skills with the biggest percentage swings from 2023 to 2025. The script computes a volatility score as the absolute percentage change and lists the top N most volatile skills that appear in both years.
+
+```bash
+python top_100_volatile_skills.py \
+  --counts_2023 2023.csv \
+  --counts_2025 2025.csv \
+  --output_dir trends
+```
+
+The resulting CSV `top_volatile_skills.csv` contains the skill name along with its volatility percentage and raw percent change.
