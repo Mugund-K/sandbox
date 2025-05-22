@@ -49,6 +49,15 @@ def bucket_skills(
             subset = subset.sort_values("pct_change").head(top_n)
         else:
             subset = subset.sort_values("pct_change", ascending=False).head(top_n)
+
+        # Format counts as integers and percentage change with a trailing % sign
+        subset["count_2023"] = subset["count_2023"].round().astype("Int64")
+        subset["count_2025"] = subset["count_2025"].round().astype("Int64")
+        subset["pct_change"] = (
+            subset["pct_change"].round().astype("Int64").map(
+                lambda x: f"{x}%" if pd.notna(x) else ""
+            )
+        )
         result[label] = subset[["name", "pct_change", "count_2023", "count_2025"]]
 
     return result

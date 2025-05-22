@@ -103,6 +103,8 @@ def main() -> None:
 
     # Round percentage change and add a trailing percent sign for the CSV
     csv_df = top_common.copy()
+    csv_df["count_2023"] = csv_df["count_2023"].round().astype("Int64")
+    csv_df["count_2025"] = csv_df["count_2025"].round().astype("Int64")
     csv_df["pct_change"] = (
         csv_df["pct_change"].round().astype("Int64").map(
             lambda x: f"{x}%" if pd.notna(x) else ""
